@@ -1,0 +1,51 @@
+[
+    {
+        "id": "1",
+        "description": "LV ABC CABLE 4*95sqmm",
+        "unit": "KM",
+        "qty": "78",
+        "unit_price": "14295000"
+    },
+    {
+        "id": "2",
+        "description": "LV ABC CABLE 4*50sqmm",
+        "unit": "KM",
+        "qty": "30",
+        "unit_price": "8074000"
+    },
+    {
+        "id": "3",
+        "description": "LV ABC CABLE 4*25sqmm",
+        "unit": "KM",
+        "qty": "2",
+        "unit_price": "4700000"
+    },
+    {
+        "id": "4",
+        "description": "LV SERVICE CABLE AIRDAC 16sqmm",
+        "unit": "KM",
+        "qty": "33",
+        "unit_price": "2969000"
+    },
+    {
+        "id": "5",
+        "description": "EARTHING COPPER WIRE PVC INSULATED 35sqmm",
+        "unit": "KM",
+        "qty": "8",
+        "unit_price": "11542000"
+    },
+    {
+        "id": "6",
+        "description": "EARTHING COPPER WIRE BARE 35sqmm",
+        "unit": "KM",
+        "qty": "2",
+        "unit_price": "10041000"
+    },
+    {
+        "id": "7",
+        "description": "STAY WIRE 7/8 SWG",
+        "unit": "KM",
+        "qty": "8",
+        "unit_price": "3820000"
+    }
+]
