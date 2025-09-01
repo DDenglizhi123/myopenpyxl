@@ -103,7 +103,7 @@ def slice_obj_list(original_obj_list:list):
     
 #5. 处理detailed_data, 返回一个2元列表
 def get_values_from_dic(details_data):
-    ...
+    result = [list(d.values()) for d in items.values()]
 #6. 为单元格填入数据
 def insert_value(cells_obj_list,value_list):
     ...
