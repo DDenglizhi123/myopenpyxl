@@ -1,8 +1,9 @@
 # 调用库
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
-from openpyxl.styles import Border, Side
+from openpyxl.styles import Border, Side, Font
 from openpyxl.styles import Alignment
+import pprint
 
 loading_path = 'xlsx/test1.xlsx'
 saving_path = 'xlsx/test2.xlsx'
@@ -47,6 +48,8 @@ items = {
 }
 
 starting_row = 16
+
+
 # 配置
 def configs() -> None:
     # 配置打印和样式
@@ -83,45 +86,100 @@ def get_cells_obj(starting_row:int,rows:dict) -> list:
     return all_cells_obj
             
             
-#4. 将列表中单元格对象分类:需要填入details_data的列表,需要填入公式的列表
-def slice_obj_list(original_obj_list:list):
-    merge_list = [row[1:5] for row in original_obj_list]
-    formular_list = [row[8] for row in original_obj_list]
-    for row in original_obj_list:
-        del row[1:5]
-    data_list = original_obj_list
-    print(merge_list)
-    print('______________________________')
-    print(formular_list)
-    print('______________________________')
-    print(data_list)
+#4. 将列表中单元格对象分类:需要填入details_data的列表,需要填入公式的列表,和需要合并的列表
+def slice_obj_list(all_cells_obj:list):
+    merge_list = [row[1:5] for row in all_cells_obj]
+    formular_list = [row[8] for row in all_cells_obj]
+    data_list = [row[0:2]+ row[5:8] for row in all_cells_obj]
+    # print(merge_list)
+    # print('______________________________')
+    # print(formular_list)
+    # print('______________________________')
+    # print(data_list)
     
     
-    # return merge_list, formular_list, data_list
+    return merge_list, formular_list, data_list
     # print(merge_list)
     # print(original_obj_list)
+
+# 合并单元格
+def i_merge_cells(merge_list:list):
+    for row_cells in merge_list:
+        ws.merge_cells(f'{row_cells[0].coordinate}:{row_cells[-1].coordinate}')
     
 #5. 处理detailed_data, 返回一个2元列表
-def get_values_from_dic(details_data):
+def get_values_from_dic(items:dict) -> list:
     result = [list(d.values()) for d in items.values()]
+    # print(result)
+    return result
 #6. 为单元格填入数据
-def insert_value(cells_obj_list,value_list):
-    ...
+def insert_value(data_list:list,items_details_list:list):
+    for row_cells, row_values in zip(data_list, items_details_list):
+        for cell, value in zip(row_cells, row_values):
+            cell.value = value
 #7. 为单元格添加公式
-def insert_formula(formula_obj_list,formula):
-    ...
+def insert_formula(formular_list:list, data_list:list) -> object:
+    formular_cells_coordinates=[]
+    qty_cordinates = []
+    unit_price_coordinates = []
+    for row_cells in formular_list:
+        formular_cells_coordinates.append(row_cells.coordinate)
+    for row in data_list:
+        qty_cordinates.append(row[-2].coordinate)
+        unit_price_coordinates.append(row[-1].coordinate)
+    for i in range(len(formular_list)):
+        ws[f'{formular_cells_coordinates[i]}']=f'=({qty_cordinates[i]}*{unit_price_coordinates[i]})'
+    sub_total_obj = ws.cell(row = formular_list[-1].row + 1, column=formular_list[-1].column)
+    print(sub_total_obj)
+    sub_total_obj.value = f'=SUM({formular_cells_coordinates[0]}:{formular_cells_coordinates[-1]})'
+    adv_payment_obj = ws.cell(row = sub_total_obj.row + 1, column=sub_total_obj.column)
+    adv_payment_obj.value = f'={sub_total_obj.coordinate}*18%'
+    to_be_paid_obj = ws.cell(row = adv_payment_obj.row + 1, column=adv_payment_obj.column)
+    to_be_paid_obj.value = f'={adv_payment_obj.coordinate}*18%'
+    # print(formular_cells_coordinates)
+    # print(qty_cordinates)
+    # print(unit_price_coordinates)
+    # print(json.dumps(data_list, indent=4, ensure_ascii=False))
+    # pprint.pprint(data_list[0][-2].coordinate, width=40)
+    return sub_total_obj, adv_payment_obj, to_be_paid_obj
+
 #8. 为单元格添加边框
-def add_border(cells_obj_list):
-    ...
+def add_styles(obj):
+    thin = Side(border_style='thin',color='000000')
+    try:
+        if len(obj) > 0 and isinstance(obj[0], list):
+            for row_cells in obj:
+                for cell in row_cells:
+                    cell.border = Border(top=thin, bottom=thin, left=thin, right=thin)
+                    cell.font = Font(name="Calibri", bold=False, italic=False, size=9)
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+                
+                for cell in row_cells[1:-1]:
+                    cell.number_format = "#,##0.000"
+    except:
+        # obj.border = Border(top=thin, bottom=thin, left=thin, right=thin)
+        obj.font = Font(name="Calibri", bold=False, italic=False, size=9)
+        obj.alignment = Alignment(horizontal='center', vertical='center')
+        obj.number_format = "#,##0.000"
 
 def main():
-    # input_data_others(other_data,image_path)
-    # insert_rows(starting_row,items)
+    input_data_others(other_data,image_path)
+    insert_rows(starting_row,items)
     all_obj_list = get_cells_obj(starting_row,items)
-    slice_obj_list(all_obj_list)
-    # configs()
+    add_styles(all_obj_list)
+    # pprint.pprint(all_obj_list)
+    merge_list, formular_list, data_list = slice_obj_list(all_obj_list)
+    i_merge_cells(merge_list)
+    items_details_list = get_values_from_dic(items)
+    insert_value(data_list,items_details_list)
+    sub_total_obj, adv_payment_obj, to_be_paid_obj = insert_formula(formular_list, data_list)
+    add_styles(sub_total_obj)
+    add_styles(adv_payment_obj)
+    add_styles(to_be_paid_obj)
+
+    # # configs()
 
 if __name__ == '__main__':
     main()
+    wb.save(saving_path)
     
-# wb.save(saving_path)
