@@ -87,3 +87,6 @@ $RECYCLE.BIN/
 # Jupyter Notebook
 # ========================
 .ipynb_checkpoints/
+Archive.zip
+.DS_Store
+.DS_Store
